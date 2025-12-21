@@ -407,37 +407,6 @@ typedef struct Node {
     \end{itemize}
 \end{frame}
 
-\begin{frame}[fragile]{TEMPLATE1}
-    \textbf{1.2. Cấu trúc}
-    \small
-    \begin{itemize}
-        \item Cấu trúc (struct) là một kiểu dữ liệu người dùng tự định nghĩa
-(user defined datatype)
-        \item Cấu trúc là một tập hợp các biến, những biến này có thể có kiểu
-dữ liệu khác nhau
-    \end{itemize}
-
-    \vspace{0.3cm}
-    \begin{columns}[T,onlytextwidth]
-        \begin{column}{0.5\textwidth}
-            \begin{minted}{c}
-typedef struct Node {
-    int value;       // Dữ liệu
-    struct Node* next; // Liên kết
-} Node;
-            \end{minted}
-        \end{column}
-        \begin{column}{0.5\textwidth}
-            \centering
-            \begin{tikzpicture}
-                \node[listnode] (N) {value \nodepart{second} next};
-                \node[above] at (N.north) {\textbf{Cấu trúc 1 Node}};
-                \draw[->] (N.two south) -- ++(0,-0.5) node[below] {Trỏ tới Node kế tiếp};
-            \end{tikzpicture}
-        \end{column}
-    \end{columns}
-\end{frame}
-
 % =========================================================
 % 2. DANH SÁCH LIÊN KẾT ĐƠN
 % =========================================================
@@ -1146,5 +1115,6 @@ Node* reverse(Node* head) {
     }{}
 \end{frame}
 }
+
 
 \end{document}
