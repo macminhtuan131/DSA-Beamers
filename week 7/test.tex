@@ -1,0 +1,195 @@
+\documentclass{beamer}
+\usepackage[utf8]{inputenc}
+\usepackage[vietnamese]{babel}
+\usepackage{tikz}
+\usepackage{minted} % <--- BỔ SUNG GÓI NÀY
+\usetikzlibrary{shapes.multipart, positioning, arrows.meta, calc}
+
+% --- Định nghĩa các style cho TikZ ---
+\tikzset{
+    listnode/.style={
+        rectangle split, rectangle split parts=2, rectangle split horizontal,
+        draw,
+        rectangle split part fill={white, gray!20},
+        font=\small,
+        minimum height=0.8cm
+    },
+    ptr/.style={->, >=stealth, thick},
+    ptrColor/.style={red!80!black},
+    labelColor/.style={blue!80!black, font=\footnotesize},
+    movePtr/.style={->, >=stealth, dashed, blue, thick, bend right=45}
+}
+
+\begin{document}
+
+% --- FRAME 1: Trạng thái sau khi đảo chiều node đầu tiên ---
+\begin{frame}[fragile]{Đảo ngược danh sách (Reverse)}
+    \textbf{Bước 1: Đảo chiều liên kết của node đầu tiên}
+    
+    \begin{columns}[T]
+        \begin{column}{0.55\textwidth}
+            \begin{minted}[fontsize=\scriptsize, linenos]{c}
+Node* reverse(Node* head) {
+    Node* cur = head;
+    Node* prev = NULL;
+    Node* next = NULL;
+    
+    while (cur != NULL) {
+        next = cur->next; // 1. Lưu next
+        cur->next = prev; // 2. Đảo chiều
+        // 3. Tịnh tiến
+        prev = cur;
+        cur = next;
+    }
+    return prev;
+}
+            \end{minted}
+        \end{column}
+        
+        \begin{column}{0.45\textwidth}
+            \centering
+            \vspace{1cm}
+            \begin{tikzpicture}[scale=0.85, transform shape]
+                % Các nodes
+                \node (NULL_PREV) {NULL};
+                \node[listnode, right=1.2cm of NULL_PREV] (A) {1 \nodepart{second} $\bullet$};
+                \node[listnode, right=0.8cm of A] (B) {2 \nodepart{second} $\bullet$};
+                \node[listnode, right=0.8cm of B] (C) {3 \nodepart{second} \texttt{NULL}};
+                
+                % Các con trỏ
+                \node[labelColor, above=0.6cm of NULL_PREV] (prev) {prev};
+                \draw[ptr] (prev) -- (NULL_PREV);
+                \node[labelColor, above=0.6cm of A] (cur) {cur};
+                \draw[ptr] (cur) -- (A);
+                \node[labelColor, above=0.6cm of B] (next_ptr) {next};
+                \draw[ptr] (next_ptr) -- (B);
+
+                % Liên kết cũ (mờ)
+                \draw[ptr, gray!30, dashed] (A.two east) -- (B);
+                
+                % Liên kết mới (đảo chiều - đậm)
+                \draw[ptr, ptrColor] (A.two south) to[out=200, in=-20] (NULL_PREV.south east);
+                \node[below=0.1cm of A, ptrColor, font=\tiny] {cur->next=prev};
+                
+                \draw[ptr] (B.two east) -- (C);
+            \end{tikzpicture}
+            \vspace{0.5cm}
+            \footnotesize{Kết thúc bước 2 của vòng lặp đầu tiên.}
+        \end{column}
+    \end{columns}
+\end{frame}
+
+% --- FRAME 2: Tịnh tiến các con trỏ ---
+\begin{frame}[fragile]{Đảo ngược danh sách (Reverse)}
+    \textbf{Bước 2: Tịnh tiến các con trỏ (prev và cur)}
+    
+    \begin{columns}[T]
+        \begin{column}{0.55\textwidth}
+            \begin{minted}[fontsize=\scriptsize, linenos, firstnumber=8]{c}
+        // 3. Tịnh tiến
+        prev = cur; // prev chuyển đến 1
+        cur = next; // cur chuyển đến 2
+    }
+    return prev;
+}
+            \end{minted}
+        \end{column}
+        
+        \begin{column}{0.45\textwidth}
+            \centering
+            \vspace{1cm}
+            \begin{tikzpicture}[scale=0.85, transform shape]
+                \node (NULL_PREV) {NULL};
+                \node[listnode, right=1.2cm of NULL_PREV] (A) {1 \nodepart{second} $\bullet$};
+                \node[listnode, right=0.8cm of A] (B) {2 \nodepart{second} $\bullet$};
+                \node[listnode, right=0.8cm of B] (C) {3 \nodepart{second} \texttt{NULL}};
+                
+                % Vị trí CŨ (mờ)
+                \node[labelColor, above=0.6cm of NULL_PREV, opacity=0.4] (prev_old) {prev};
+                \draw[ptr, opacity=0.4] (prev_old) -- (NULL_PREV);
+                \node[labelColor, above=0.6cm of A, opacity=0.4] (cur_old) {cur};
+                \draw[ptr, opacity=0.4] (cur_old) -- (A);
+
+                % Vị trí MỚI (đậm)
+                \node[labelColor, above=0.6cm of A] (prev_new) {prev};
+                \draw[ptr] (prev_new) -- (A);
+                \node[labelColor, above=0.6cm of B] (cur_new) {cur};
+                \draw[ptr] (cur_new) -- (B);
+                \node[labelColor, above=0.6cm of B, xshift=1cm] (next_ptr) {next};
+                \draw[ptr] (next_ptr) -- (B); 
+
+                % Mũi tên di chuyển
+                \draw[movePtr] (prev_old.east) to (prev_new.west);
+                \draw[movePtr] (cur_old.east) to (cur_new.west);
+
+                \draw[ptr, ptrColor] (A.two south) to[out=200, in=-20] (NULL_PREV.south east);
+                \draw[ptr] (B.two east) -- (C);
+            \end{tikzpicture}
+        \end{column}
+    \end{columns}
+\end{frame}
+
+% --- FRAME 3: Kết quả sau khi đảo ---
+\begin{frame}[fragile]{Đảo ngược danh sách (Reverse)}
+    \textbf{Kết quả: Sau khi vòng lặp kết thúc}
+    \vspace{0.5cm}
+    \centering
+    \begin{tikzpicture}[
+        node distance=1.5cm, 
+        transform shape, 
+        scale=0.9,
+        % --- ĐỊNH NGHĨA STYLE TRỰC TIẾP TẠI ĐÂY ---
+        listnode/.style={
+            rectangle split, 
+            rectangle split parts=2, 
+            rectangle split horizontal, 
+            draw=blue!80!black,
+            thick,
+            rectangle split part fill={white, gray!20},
+            minimum height=1cm,
+            minimum width=1.8cm,
+            font=\Large\bfseries
+        },
+        ptrArrow/.style={
+            ->, 
+            >=stealth, 
+            very thick, 
+            blue!80!black,
+            font=\bfseries\color{blue!80!black}
+        },
+        linkArrow/.style={
+            ->, 
+            >=stealth, 
+            ultra thick, 
+            red!80!black
+        }
+    ]
+        % 1. Vẽ Node NULL ở cuối cùng bên phải
+        \node[font=\Large\bfseries] (NULL) {NULL};
+
+        % 2. Vẽ các node dữ liệu
+        \node[listnode, left=of NULL] (Node1) {1 \nodepart{second} $\bullet$};
+        \node[listnode, left=of Node1] (Node2) {2 \nodepart{second} $\bullet$};
+        \node[listnode, left=of Node2] (Node3) {3 \nodepart{second} $\bullet$};
+
+        % 3. Vẽ các đường liên kết màu ĐỎ (Dùng .two để lấy tâm phần chứa dấu chấm)
+        \draw[linkArrow] (Node3.two) -- (Node2);
+        \draw[linkArrow] (Node2.two) -- (Node1);
+        \draw[linkArrow] (Node1.two) -- (NULL);
+
+        % 4. Vẽ các con trỏ quản lý (Màu XANH)
+        % Con trỏ prev
+        \node[above=1cm of Node3, ptrArrow] (prevLbl) {prev (Head mới)};
+        \draw[ptrArrow] (prevLbl) -- (Node3);
+
+        % Con trỏ cur và next
+        \node[above=1.2cm of NULL, xshift=-0.8cm, ptrArrow] (curLbl) {cur};
+        \draw[ptrArrow] (curLbl) -- (NULL.north west);
+
+        \node[above=1.2cm of NULL, xshift=0.8cm, ptrArrow] (nextLbl) {next};
+        \draw[ptrArrow] (nextLbl) -- (NULL.north east);
+
+    \end{tikzpicture}
+\end{frame}
+
+\end{document}
